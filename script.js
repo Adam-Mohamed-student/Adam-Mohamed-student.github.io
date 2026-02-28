@@ -1,121 +1,124 @@
-// =============================
-// TRUEFOCUS MAIN SCRIPT (FULLY UPDATED)
-// =============================
+/* ==================================
+   TrueFocus - Main JavaScript File
+=================================== */
 
-// -----------------------------
-// Smooth Fade-In Animation
-// -----------------------------
+
+/* ===============================
+   Smooth Fade-In on Scroll
+================================= */
+
 const faders = document.querySelectorAll('.fade');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('show');
-    }
+
+if (faders.length > 0) {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('show');
+      }
+    });
   });
-});
-faders.forEach(el => observer.observe(el));
 
-// -----------------------------
-// Dark / Light Mode Toggle
-// -----------------------------
-const toggle = document.getElementById('themeToggle');
-toggle.addEventListener('click', () => {
-  document.body.classList.toggle('light');
-  toggle.textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
-});
-
-// -----------------------------
-// Animated Particles Background
-// -----------------------------
-const canvas = document.createElement('canvas');
-document.getElementById('particles').appendChild(canvas);
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-for (let i = 0; i < 80; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2 + 1,
-    dx: (Math.random() - 0.5) * 0.5,
-    dy: (Math.random() - 0.5) * 0.5
-  });
+  faders.forEach(el => observer.observe(el));
 }
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#38bdf8";
-  particles.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fill();
 
-    p.x += p.dx;
-    p.y += p.dy;
+/* ===============================
+   Dark / Light Mode Toggle
+================================= */
 
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-  });
-  requestAnimationFrame(animate);
+const themeToggle = document.getElementById('theme-toggle');
+
+// Load saved theme
+if (localStorage.getItem("theme") === "light") {
+  document.body.classList.add("light");
+  themeToggle.textContent = "🌙";
+} else {
+  themeToggle.textContent = "☀️";
 }
-animate();
 
-window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("light");
+
+  if (document.body.classList.contains("light")) {
+    localStorage.setItem("theme", "light");
+    themeToggle.textContent = "🌙";
+  } else {
+    localStorage.setItem("theme", "dark");
+    themeToggle.textContent = "☀️";
+  }
 });
 
-// -----------------------------
-// Smooth Scroll Function
-// -----------------------------
-function scrollToSection(id) {
-  document.getElementById(id).scrollIntoView({
-    behavior: 'smooth'
+
+/* ===============================
+   Mouse Follow Glow Effect
+================================= */
+
+const glowCards = document.querySelectorAll('.glow-card');
+
+glowCards.forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    card.style.setProperty('--mouse-x', x + '%');
+    card.style.setProperty('--mouse-y', y + '%');
   });
-}
+});
 
-// -----------------------------
-// REAL EMAIL SENDING (EmailJS)
-// -----------------------------
-// ⚠️ IMPORTANT SETUP REQUIRED:
-// 1. Go to https://www.emailjs.com/
-// 2. Connect your Gmail
-// 3. Create Email Service
-// 4. Create Email Template
-// 5. Replace the IDs below
 
-(function () {
-  emailjs.init("DvNt3VpNrx3VCsC1p"); // <-- REPLACE THIS
-})();
+/* ===============================
+   Animated Particles Background
+================================= */
 
-const form = document.getElementById("contactForm");
+const particlesContainer = document.getElementById('particles');
 
-if (form) {
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
+if (particlesContainer) {
 
-    const statusText = document.getElementById("formStatus");
+  const canvas = document.createElement('canvas');
+  particlesContainer.appendChild(canvas);
 
-    const templateParams = {
-      from_name: document.getElementById("name").value,
-      from_email: document.getElementById("email").value,
-      message: document.getElementById("message").value
-    };
+  const ctx = canvas.getContext('2d');
 
-    statusText.textContent = "Sending message...";
-    statusText.style.color = "#38bdf8";
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
 
-    emailjs.send("service_mn212pa", "template_pawkjy7", templateParams)
-      .then(function () {
-        statusText.textContent = "Message sent successfully!";
-        statusText.style.color = "#22c55e";
-        form.reset();
-      }, function (error) {
-        statusText.textContent = "Failed to send message. Please try again.";
-        statusText.style.color = "#ef4444";
-        console.error("EmailJS Error:", error);
-      });
-  });
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const particles = [];
+  const particleCount = 80;
+
+  for (let i = 0; i < particleCount; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 0.6,
+      dy: (Math.random() - 0.5) * 0.6
+    });
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "rgba(56,189,248,0.8)";
+
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      p.x += p.dx;
+      p.y += p.dy;
+
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    });
+
+    requestAnimationFrame(animateParticles);
+  }
+
+  animateParticles();
 }
